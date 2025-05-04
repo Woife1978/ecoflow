@@ -2,12 +2,13 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
+import EcoFlowDashboard from './EcoflowDashboard'; // Import the EcoFlowDashboard component
 import reportWebVitals from './reportWebVitals';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <App />
+    <EcoFlowDashboard /> {/* Use the imported component */}
   </React.StrictMode>
 );
 
