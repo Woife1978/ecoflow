@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoFlow Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        #timeRange {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>EcoFlow Dashboard</h1>
+    <label for="timeRange">Select Time Range:</label>
+    <select id="timeRange">
+        <option value="60">Last 60 seconds</option>
+        <option value="300">Last 5 minutes</option>
+        <option value="3600">Last hour</option>
+        <option value="86400">Last day</option>
+        <option value="604800">Last week</option>
+    </select>
+    <canvas id="solarChart" width="800" height="400"></canvas>
+
+    <script>
+        const ctx = document.getElementById('solarChart').getContext('2d');
+        const solarChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Solar Input (Watts)',
+                    data: [],
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 1600
+                    }
+                }
+            }
+        });
+
+        async function fetchData(seconds) {
+            const response = await fetch(`/api/SolarData/last?seconds=${seconds}`);
+            const data = await response.json();
+            return data;
+        }
+
+        async function updateChart() {
+            const timeRange = document.getElementById('timeRange').value;
+            const data = await fetchData(timeRange);
+
+            solarChart.data.labels = data.map(d => new Date(d.datetime).toLocaleTimeString());
+            solarChart.data.datasets[0].data = data.map(d => d.input);
+            solarChart.update();
+        }
+
+        document.getElementById('timeRange').addEventListener('change', updateChart);
+
+        // Refresh every second
+        setInterval(updateChart, 1000);
+        updateChart();
+    </script>
+</body>
+</html>

@@ -1,0 +1,33 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        // .NET Backend Launch Configuration
+        {
+            "name": ".NET Core Launch (Console - DataCollector)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build: EcoflowDataCollector", // Build backend before launching
+            "program": "${workspaceFolder}/EcoflowDataCollector/bin/Debug/net9.0/EcoflowDataCollector.dll", // Adjust path as needed
+            "args": [],
+            "cwd": "${workspaceFolder}/EcoflowDataCollector",
+            "console": "internalConsole",
+            "stopAtEntry": false
+        },
+        // .NET Core Launch for the Frontend (Serving the Built React App)
+        {
+            "name": ".NET Core Launch (Web - Frontend)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build: EcoflowFrontend",
+            "program": "${workspaceFolder}/EcoflowFrontend/bin/Debug/net9.0/EcoflowFrontend.dll",
+            "args": [
+                "--urls",
+                "http://192.168.0.13:5001" // Or use the specific IP address: "http://YOUR_IP_ADDRESS:5001"
+            ],
+            "cwd": "${workspaceFolder}/EcoflowFrontend",
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development"
+            }
+        }
+    ]
+}

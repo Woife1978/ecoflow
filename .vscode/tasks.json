@@ -1,0 +1,62 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        // .NET Backend Build Tasks (Assuming these remain the same)
+        {
+            "label": "build: EcoflowShared",
+            "command": "dotnet",
+            "args": [
+                "build",
+                "${workspaceFolder}/EcoflowShared/EcoflowShared.csproj"
+            ],
+            "problemMatcher": "$msCompile",
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            }
+        },
+        {
+            "label": "build: EcoflowDataCollector",
+            "command": "dotnet",
+            "args": [
+                "build",
+                "${workspaceFolder}/EcoflowDataCollector/EcoflowDataCollector.csproj"
+            ],
+            "dependsOn": [
+                "build: EcoflowShared"
+            ],
+            "problemMatcher": "$msCompile",
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            }
+        },
+        // .NET Core Build Task for the Frontend (Handles React Build)
+        {
+            "label": "build: EcoflowFrontend",
+            "command": "dotnet",
+            "args": [
+                "build",
+                "${workspaceFolder}/EcoflowFrontend/EcoflowFrontend.csproj" // Adjust path if your .csproj has a different name
+            ],
+            "problemMatcher": "$msCompile", // You might need a different problem matcher if the React build outputs specific errors
+            "group": {
+                "kind": "build",
+                "isDefault": true // Set this as the default build task
+            }
+        },
+        // Composite Build Task (Build All - Including Frontend)
+        {
+            "label": "build: All",
+            "dependsOn": [
+                "build: EcoflowShared",
+                "build: EcoflowDataCollector",
+                "build: EcoflowFrontend"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            }
+        }
+    ]
+}
