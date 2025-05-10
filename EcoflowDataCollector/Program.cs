@@ -32,11 +32,28 @@ namespace EcoflowDataCollector{
 
             foreach (var item in devices)
             {
+                var values = ecoflowClient.GetDeviceAllParameters(item.Sn);
                 //if device is online, get all parameters and export to json file
                 if(item.Online == 1)
                 {
-                    var values = ecoflowClient.GetDeviceAllParameters(item.Sn);
-                    Json.ExportDictionaryToJson(values, $"./temp/json/{item.Sn}.json");    
+                    switch (item.ProductName)
+                    {
+                        case "DELTA Pro":
+                            DeltaPro deltaPro = ecoflowClient.GetDeviceAllParameters<DeltaPro>(item.Sn);
+                            Json.ExportToJson(deltaPro, $"./temp/json/{item.Sn}.json");    
+                            break;
+                        case "Smart Home Panel":
+                            SmartHomePanel smartHomePanel = ecoflowClient.GetDeviceAllParameters<SmartHomePanel>(item.Sn);
+                            Json.ExportToJson(smartHomePanel, $"./temp/json/{item.Sn}.json");
+                            break;
+                        case "RIVER 2":
+                            Console.WriteLine($"Device {item.Sn} is online");
+                            Json.ExportDictionaryToJson(values, $"./temp/json/{item.Sn}.json");
+                            break;
+                        default:
+                            Console.WriteLine($"Device {item.Sn} is offline");
+                            break;
+                    }
                 }   
             }
             Console.WriteLine("Running data collector");

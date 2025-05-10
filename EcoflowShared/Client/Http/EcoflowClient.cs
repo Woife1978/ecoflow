@@ -1,6 +1,8 @@
 
 using EcoflowShared.exceptions;
+using EcoflowShared.helpers.json;
 using EcoflowShared.http.response;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace EcoflowShared.http
@@ -67,6 +69,22 @@ namespace EcoflowShared.http
             }
             string responseBody = response.Content.ReadAsStringAsync().Result;
             return _responseParser.ParseParamsResponse(responseBody).Data;
+        }
+
+        public T GetDeviceAllParameters<T>(string sn)
+        {
+            var queryParams = new JObject
+            {
+                { "sn", sn }
+            };
+
+            HttpResponseMessage response = _restClient.Get(GET_ALL_QUOTA_URL, new QueryString(queryParams));
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new EcoflowHttpException(response.Content.ReadAsStringAsync().Result);
+            }
+            string responseBody = response.Content.ReadAsStringAsync().Result;
+            return JsonConvert.DeserializeObject<T>(responseBody);
         }
 
         public async Task<Dictionary<string, object>> GetDeviceParameters(string sn, List<string> parameters)

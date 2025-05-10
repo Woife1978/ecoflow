@@ -11,6 +11,7 @@ A user-friendly web dashboard built with Html or React allows you to access and 
 This project was inspired by and based on the [ecoflow-api Java repository](https://github.com/tess1o/ecoflow-api). Special thanks to the contributors of that project for providing a foundation for this implementation in .NET Core.
 
 # Updates
+10th May 2025 - 
 4th May 2025 - Initial commit, React dashboard coming shortly, alongside more generic and reusable C# code to support broader use cases.
 
 ## Features

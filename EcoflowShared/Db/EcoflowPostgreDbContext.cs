@@ -8,6 +8,6 @@ public class EcoflowPostgreDbContext : DbContext
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         //Update the connection string with your PostgreSQL database details
-        optionsBuilder.UseNpgsql("Host=127.0.0.1;port=5433;Username=ecoflowuser;Password=Ecoflow1;Database=EcoflowData");
+        optionsBuilder.UseNpgsql("Host=127.0.0.1;port=5432;Username=ecoflowuser;Password=Ecoflow1;Database=EcoflowData");
     }
 }
