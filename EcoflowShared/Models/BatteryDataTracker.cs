@@ -4,8 +4,8 @@
         public string devicename { get; set; }
         public string serialnumber { get; set; }
         public DateTime datetime { get; set; }
-        public int soc { get; set; }
-        public int extrabattery1soc { get; set; }
-        public int extrabattery2soc { get; set; }
+        public decimal soc { get; set; }
+        public decimal extrabattery1soc { get; set; }
+        public decimal extrabattery2soc { get; set; }
         public int voltage { get; set; }
     }

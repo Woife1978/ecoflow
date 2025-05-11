@@ -6,7 +6,13 @@ namespace EcoflowShared.helpers.data
 {
     public class DataHelper
     {
-        public static Task FetchDeviceData(List<EcoflowDevice> ecoflowDevices, EcoflowClient ecoflowClient)
+        private readonly EcoflowPostgreDbContext _dbContext;
+
+        public DataHelper(EcoflowPostgreDbContext dbContext)
+        {
+            _dbContext = dbContext;
+        }
+        public Task FetchDeviceData(List<EcoflowDevice> ecoflowDevices, EcoflowClient ecoflowClient)
         {
             foreach (var device in ecoflowDevices)
             {
@@ -16,15 +22,15 @@ namespace EcoflowShared.helpers.data
                     var values = ecoflowClient.GetDeviceAllParameters(device.Sn);
                     if(device.ProductName == "DELTA Pro")
                     {
-                       DbHelper.WriteSolarDataToDatabase(new EcoflowPostgreDbContext(),device, values);
-                       DbHelper.WriteBatteryDataToDatabase(new EcoflowPostgreDbContext(),device, values);
+                       DbHelper.WriteSolarDataToDatabase(_dbContext,device, values);
+                       DbHelper.WriteBatteryDataToDatabase(_dbContext,device, values);
                     }
                 }
             }
             return Task.CompletedTask;
         }
 
-        public static async Task FetchDeviceDataAsync(List<EcoflowDevice> ecoflowDevices, EcoflowClient ecoflowClient)
+        public async Task FetchDeviceDataAsync(List<EcoflowDevice> ecoflowDevices, EcoflowClient ecoflowClient)
         {
             var solarTask = Task.Run(async () =>
             {
@@ -40,7 +46,7 @@ namespace EcoflowShared.helpers.data
                         if (device.Online == 1 && device.ProductName == "DELTA Pro")
                         {
                             var values = ecoflowClient.GetDeviceAllParameters(device.Sn);
-                            DbHelper.WriteSolarDataToDatabase(new EcoflowPostgreDbContext(), device, values);
+                            DbHelper.WriteSolarDataToDatabase(_dbContext, device, values);
                         }
                     }
                 }
@@ -59,7 +65,7 @@ namespace EcoflowShared.helpers.data
                         if (device.Online == 1 && device.ProductName == "DELTA Pro")
                         {
                             var values = ecoflowClient.GetDeviceAllParameters(device.Sn);
-                            DbHelper.WriteBatteryDataToDatabase(new EcoflowPostgreDbContext(), device, values);
+                            DbHelper.WriteBatteryDataToDatabase(_dbContext, device, values);
                         }
                     }
                 }

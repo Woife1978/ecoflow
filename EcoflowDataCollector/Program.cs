@@ -3,28 +3,46 @@ using EcoflowShared.http;
 using EcoflowShared.http.response;
 using EcoflowShared.helpers.json;
 using EcoflowShared.helpers.data;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.EntityFrameworkCore;
 
 namespace EcoflowDataCollector{
   public class Program
     {
         private static string ACCESS_KEY = string.Empty;
         private static string SECRET_KEY = string.Empty;
-
-        public static void LoadConfiguration()
+        
+        public static void LoadConfiguration(IConfiguration configuration)
         {
-            var config = new ConfigurationBuilder()
-                .AddJsonFile("appsettings.json")
-                .Build();
-
-            ACCESS_KEY = config["AccessKey"] ?? string.Empty;
-            SECRET_KEY = config["SecretKey"] ?? string.Empty;
+            ACCESS_KEY = configuration["AccessKey"] ?? string.Empty;
+            SECRET_KEY = configuration["SecretKey"] ?? string.Empty;
         }
 
         static async Task Main(string[] args)
         {
-            LoadConfiguration();
-            HttpRestClient httpRestClient = new HttpRestClient(ACCESS_KEY, SECRET_KEY);
-            EcoflowClient ecoflowClient = new EcoflowClient(httpRestClient);
+            // Set up DI container
+            var serviceCollection = new ServiceCollection();
+            var configuration = new ConfigurationBuilder()
+                .AddJsonFile("appsettings.json")
+                .Build();
+            
+            LoadConfiguration(configuration);
+            serviceCollection.AddSingleton(configuration);
+
+            serviceCollection.AddDbContext<EcoflowPostgreDbContext>(options =>
+                options.UseNpgsql(configuration.GetConnectionString("EcoflowDatabase")));
+            serviceCollection.AddSingleton<EcoflowClient>(sp =>
+            {
+                var httpRestClient = new HttpRestClient(ACCESS_KEY, SECRET_KEY);
+                return new EcoflowClient(httpRestClient);
+            });
+            serviceCollection.AddSingleton<DataHelper>();
+
+            var serviceProvider = serviceCollection.BuildServiceProvider();
+
+            var ecoflowClient = serviceProvider.GetRequiredService<EcoflowClient>();
+            var dataHelper = serviceProvider.GetRequiredService<DataHelper>();
+
             //get all linked devices
             List<EcoflowDevice> devices = ecoflowClient.GetDevices();
             //Export devices to json file
@@ -39,11 +57,11 @@ namespace EcoflowDataCollector{
                     switch (item.ProductName)
                     {
                         case "DELTA Pro":
-                            DeltaPro deltaPro = ecoflowClient.GetDeviceAllParameters<DeltaPro>(item.Sn);
+                            DeltaPro deltaPro = await ecoflowClient.GetDeviceAllParameters<DeltaPro>(item.Sn);
                             Json.ExportToJson(deltaPro, $"./temp/json/{item.Sn}.json");    
                             break;
                         case "Smart Home Panel":
-                            SmartHomePanel smartHomePanel = ecoflowClient.GetDeviceAllParameters<SmartHomePanel>(item.Sn);
+                            SmartHomePanel smartHomePanel = await ecoflowClient.GetDeviceAllParameters<SmartHomePanel>(item.Sn);
                             Json.ExportToJson(smartHomePanel, $"./temp/json/{item.Sn}.json");
                             break;
                         case "RIVER 2":
@@ -57,7 +75,7 @@ namespace EcoflowDataCollector{
                 }   
             }
             Console.WriteLine("Running data collector");
-            await DataHelper.FetchDeviceDataAsync(devices, ecoflowClient);
+            await dataHelper.FetchDeviceDataAsync(devices, ecoflowClient);
         }  
     }
 }

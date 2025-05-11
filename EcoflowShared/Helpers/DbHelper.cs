@@ -28,7 +28,6 @@ namespace EcoflowShared.helpers.db
                 };
                 dbContext.Set<SolarInputOutputTracker>().Add(tracker);
                 dbContext.SaveChanges();
-                dbContext.Dispose();
             }
         }
 
@@ -41,14 +40,12 @@ namespace EcoflowShared.helpers.db
             }
             else
             {
-                //Console.WriteLine("Device {0}: Battery SOC {1} Voltage {2}",device.Sn, Convert.ToInt32(values["bmsMaster.soc"]), Convert.ToInt32(values["bmsMaster.vol"]));
-                
                 var tracker = new BatterySocVoltageTracker
                 {
                     devicename = device.ProductName ?? "Unknown",
                     serialnumber = device.Sn ?? "Unknown",
                     datetime = DateTime.UtcNow,
-                    soc = Convert.ToInt32(values["bmsMaster.soc"].ToString()),
+                    soc = Convert.ToDecimal(values["bmsMaster.targetSoc"].ToString()),
                     voltage = Convert.ToInt32(values["bmsMaster.vol"].ToString())
                 };
                 if(values.ContainsKey("kit.productInfoDetails"))
@@ -65,19 +62,18 @@ namespace EcoflowShared.helpers.db
                             if(kitDetails.Count == 1)
                             {
                                 var kitDetail = kitDetails.FirstOrDefault();
-                                tracker.extrabattery1soc = Convert.ToInt32(kitDetail["soc"].ToString());
+                                tracker.extrabattery1soc = Convert.ToDecimal(kitDetail["f32Soc"].ToString());
                             }
                             if(kitDetails.Count == 2)
                             {
-                                tracker.extrabattery1soc = Convert.ToInt32(kitDetails.First()["soc"].ToString());
-                                tracker.extrabattery2soc = Convert.ToInt32(kitDetails.Last()["soc"].ToString());
+                                tracker.extrabattery1soc = Convert.ToDecimal(kitDetails.First()["f32Soc"].ToString());
+                                tracker.extrabattery2soc = Convert.ToDecimal(kitDetails.Last()["f32Soc"].ToString());
                             }
                         }
                     }
                 }
                 dbContext.Set<BatterySocVoltageTracker>().Add(tracker);
                 dbContext.SaveChanges();
-                dbContext.Dispose();
             }
         }
     }

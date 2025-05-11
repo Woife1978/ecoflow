@@ -71,7 +71,7 @@ namespace EcoflowShared.http
             return _responseParser.ParseParamsResponse(responseBody).Data;
         }
 
-        public T GetDeviceAllParameters<T>(string sn)
+        public async Task<T> GetDeviceAllParameters<T>(string sn)
         {
             var queryParams = new JObject
             {
@@ -84,7 +84,9 @@ namespace EcoflowShared.http
                 throw new EcoflowHttpException(response.Content.ReadAsStringAsync().Result);
             }
             string responseBody = response.Content.ReadAsStringAsync().Result;
-            return JsonConvert.DeserializeObject<T>(responseBody);
+            // Parse the response and convert the data to the desired type
+            var parsedData = _responseParser.ParseParamsResponse(responseBody).Data;
+            return JsonConvert.DeserializeObject<T>(JsonConvert.SerializeObject(parsedData));
         }
 
         public async Task<Dictionary<string, object>> GetDeviceParameters(string sn, List<string> parameters)

@@ -21,7 +21,7 @@ namespace EcoflowFrontend.Controllers
                 .Where(d => d.datetime >= since)
                 .OrderBy(d => d.datetime)
                 .ToList();
-
+            Console.WriteLine($"Data count: {data.Count}"); // Debugging line to check data count
             return Ok(data);
         }
 

@@ -38,6 +38,25 @@ const EcoFlowDashboard = () => {
     localStorage.setItem('darkMode', darkMode);
   }, [darkMode]);
 
+  const fetchBatteryData = async (seconds) => {
+    try {
+      const res = await fetch(`/api/BatteryData/last?seconds=${seconds}`);
+      const json = await res.json();
+
+      if (json.length > 0) {
+        const latest = json[json.length - 1];
+        setSummary((prev) => ({
+          ...prev,
+          batterySoc: `${latest.soc}%`,
+          extrabattery1soc: latest.extrabattery1soc > 0 ? `${latest.extrabattery1soc}%` : '--%',
+          extrabattery2soc: latest.extrabattery2soc > 0 ? `${latest.extrabattery2soc}%` : '--%',
+        }));
+      }
+    } catch (error) {
+      console.error('Failed to fetch battery data', error);
+    }
+  };
+
   const fetchSolarData = async (seconds) => {
     try {
       const res = await fetch(`/api/SolarData/last?seconds=${seconds}`);
@@ -54,8 +73,12 @@ const EcoFlowDashboard = () => {
   };
 
   useEffect(() => {
+    fetchBatteryData(timeRange);
     fetchSolarData(timeRange);
-    const interval = setInterval(() => fetchSolarData(timeRange), 1000);
+    const interval = setInterval(() => {
+      fetchBatteryData(timeRange);
+      fetchSolarData(timeRange);
+    }, 1000);
     return () => clearInterval(interval);
   }, [timeRange]);
 
@@ -112,6 +135,8 @@ const EcoFlowDashboard = () => {
             <thead>
               <tr>
                 <th>Battery SOC</th>
+                <th>Extra Battery 1 SOC</th>
+                <th>Extra Battery 2 SOC</th>
                 <th>Grid Status</th>
                 <th>Solar Input</th>
                 <th>Home Load</th>
@@ -120,6 +145,8 @@ const EcoFlowDashboard = () => {
             <tbody>
               <tr>
                 <td>{summary.batterySoc}</td>
+                <td>{summary.extrabattery1soc}</td>
+                <td>{summary.extrabattery2soc}</td>
                 <td>{summary.gridStatus}</td>
                 <td>{summary.solarNow}</td>
                 <td>{summary.loadNow}</td>

@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 
 namespace EcoflowFrontend{
   public class Program
@@ -20,8 +22,12 @@ namespace EcoflowFrontend{
 
             // Add services to the container
             builder.Services.AddControllers();
-            builder.Services.AddDbContext<EcoflowPostgreDbContext>();
+            // Load the connection string from appsettings.json
+            var connectionString = builder.Configuration.GetConnectionString("EcoflowDatabase");
 
+            // Register the DbContext with the connection string
+            builder.Services.AddDbContext<EcoflowPostgreDbContext>(options => 
+                options.UseNpgsql(connectionString));
             // Add Swagger services
             builder.Services.AddSwaggerGen(c =>
             {
@@ -43,8 +49,20 @@ namespace EcoflowFrontend{
             });
             
             // Serve React static files
-            app.UseDefaultFiles(); // Serve index.html by default
-            app.UseStaticFiles(); // Serve static files from wwwroot
+            //app.UseDefaultFiles(); // Serve index.html by default
+            //app.UseStaticFiles(); // Serve static files from wwwroot
+
+            // Serve React static files from /react-frontend/build
+            app.UseDefaultFiles(new DefaultFilesOptions
+            {
+                FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "react-frontend", "build")),
+                RequestPath = ""
+            });
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "react-frontend", "build")),
+                RequestPath = ""
+            });
 
             // Map API controllers
             app.MapControllers();
@@ -56,7 +74,10 @@ namespace EcoflowFrontend{
                 subApp.UseRouting();
                 subApp.UseEndpoints(endpoints =>
                 {
-                    app.MapFallbackToFile("react/index.html");
+                    app.MapFallbackToFile("index.html", new StaticFileOptions
+                    {
+                        FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "react-frontend", "build"))
+                    });
                 });
             });
 
