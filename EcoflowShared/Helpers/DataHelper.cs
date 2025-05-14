@@ -32,46 +32,41 @@ namespace EcoflowShared.helpers.data
 
         public async Task FetchDeviceDataAsync(List<EcoflowDevice> ecoflowDevices, EcoflowClient ecoflowClient)
         {
+            // Get the DLL build path dynamically
+            var buildPath = AppDomain.CurrentDomain.BaseDirectory;
+            var logFilePath = Path.Combine(buildPath, "error_log.txt");
             var solarTask = Task.Run(async () =>
             {
                 while (true)
                 {
-                    var now = DateTime.UtcNow;
-                    // Calculate the delay to align with the next exact second
-                    var delay = 1000 - (now.Millisecond % 1000);
-                    await Task.Delay(delay); // Wait until the next exact second
-
-                    foreach (var device in ecoflowDevices)
+                    try
                     {
-                        if (device.Online == 1 && device.ProductName == "DELTA Pro")
+                        var now = DateTime.UtcNow;
+                        // Calculate the delay to align with the next exact second
+                        var delay = 1000 - (now.Millisecond % 1000);
+                        await Task.Delay(delay); // Wait until the next exact second
+
+                        foreach (var device in ecoflowDevices)
                         {
-                            var values = ecoflowClient.GetDeviceAllParameters(device.Sn);
-                            DbHelper.WriteSolarDataToDatabase(_dbContext, device, values);
+                            if (device.Online == 1 && device.ProductName == "DELTA Pro")
+                            {
+                                var values = ecoflowClient.GetDeviceAllParameters(device.Sn);
+                                DbHelper.WriteSolarDataToDatabase(_dbContext, device, values);
+                                DbHelper.WriteBatteryDataToDatabase(_dbContext, device, values);
+                            }
                         }
                     }
+                    catch (Exception ex)
+                    {
+                        // Handle exceptions (e.g., log them)
+                        Console.WriteLine($"Error in solarTask: {ex.Message}"); 
+                        // Log the exception to a file
+                        await File.AppendAllTextAsync(logFilePath, $"[{DateTime.UtcNow}] SolarTask Error: {ex.Message}{Environment.NewLine}");
+            }
                 }
             });
 
-            var batteryTask = Task.Run(async () =>
-            {
-                while (true)
-                {
-                    var now = DateTime.UtcNow;
-                    var delay = (60 - now.Second) * 1000 - now.Millisecond; // Align with the next full minute
-                    await Task.Delay(delay);
-
-                    foreach (var device in ecoflowDevices)
-                    {
-                        if (device.Online == 1 && device.ProductName == "DELTA Pro")
-                        {
-                            var values = ecoflowClient.GetDeviceAllParameters(device.Sn);
-                            DbHelper.WriteBatteryDataToDatabase(_dbContext, device, values);
-                        }
-                    }
-                }
-            });
-
-            await Task.WhenAll(solarTask, batteryTask); // Run both tasks concurrently
+            await solarTask;
         }
     }
 }

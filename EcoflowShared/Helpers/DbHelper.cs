@@ -16,15 +16,16 @@ namespace EcoflowShared.helpers.db
             }
             else
             {
-                //Console.WriteLine("Device {0}: Solar Input {1} Output {2}",device.Sn, Convert.ToInt32(values["mppt.inWatts"])/10, Convert.ToInt32(values["mppt.outWatts"])/10);
-                
                 var tracker = new SolarInputOutputTracker
                 {
                     devicename = device.ProductName ?? "Unknown",
                     serialnumber = device.Sn ?? "Unknown",
                     datetime = DateTime.UtcNow,
                     input = Convert.ToInt32(values["mppt.inWatts"].ToString())/10,
-                    output = Convert.ToInt32(values["mppt.outWatts"].ToString())/10
+                    output = Convert.ToInt32(values["mppt.outWatts"].ToString())/10,
+                    invol = Convert.ToInt32(values["mppt.inVol"].ToString()),
+                    inamp = Convert.ToInt32(values["mppt.inAmp"].ToString()),
+                    invoutamp = Convert.ToInt32(values["inv.invOutAmp"].ToString())
                 };
                 dbContext.Set<SolarInputOutputTracker>().Add(tracker);
                 dbContext.SaveChanges();
@@ -46,7 +47,8 @@ namespace EcoflowShared.helpers.db
                     serialnumber = device.Sn ?? "Unknown",
                     datetime = DateTime.UtcNow,
                     soc = Convert.ToDecimal(values["bmsMaster.targetSoc"].ToString()),
-                    voltage = Convert.ToInt32(values["bmsMaster.vol"].ToString())
+                    voltage = Convert.ToInt32(values["bmsMaster.vol"].ToString()),
+                    outwatts = Convert.ToInt32(values["pd.wattsOutSum"].ToString())
                 };
                 if(values.ContainsKey("kit.productInfoDetails"))
                 {

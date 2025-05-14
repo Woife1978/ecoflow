@@ -8,4 +8,5 @@
         public decimal extrabattery1soc { get; set; }
         public decimal extrabattery2soc { get; set; }
         public int voltage { get; set; }
+        public int outwatts { get; set; }
     }
