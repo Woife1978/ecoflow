@@ -4,6 +4,7 @@ public class EcoflowPostgreDbContext : DbContext
 {
     public DbSet<SolarInputOutputTracker> solarinputoutputtracker { get; set; }
     public DbSet<BatterySocVoltageTracker> batterysocvoltagetracker { get; set; }
+    public DbSet<EcoflowDevice> ecoflowdevice { get; set; }
 
     private readonly string _connectionString;
 

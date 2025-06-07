@@ -52,6 +52,7 @@ namespace EcoflowDataCollector{
             {
                 var values = ecoflowClient.GetDeviceAllParameters(item.Sn);
                 //if device is online, get all parameters and export to json file
+                await dataHelper.WriteOrUpdateDeviceToDatabase(item);
                 if(item.Online == 1)
                 {
                     switch (item.ProductName)

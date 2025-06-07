@@ -48,7 +48,7 @@ namespace EcoflowShared.helpers.db
                     datetime = DateTime.UtcNow,
                     soc = Convert.ToDecimal(values["bmsMaster.targetSoc"].ToString()),
                     voltage = Convert.ToInt32(values["bmsMaster.vol"].ToString()),
-                    outwatts = Convert.ToInt32(values["pd.wattsOutSum"].ToString())
+                    outwatts = Convert.ToInt32(values["inv.outputWatts"].ToString())
                 };
                 if(values.ContainsKey("kit.productInfoDetails"))
                 {

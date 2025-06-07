@@ -12,6 +12,34 @@ namespace EcoflowShared.helpers.data
         {
             _dbContext = dbContext;
         }
+
+        public Task WriteOrUpdateDeviceToDatabase(EcoflowDevice device)
+        {
+            // Check if the device already exists in the database
+            var existingDevice = _dbContext.ecoflowdevice.FirstOrDefault(d => d.Sn == device.Sn);
+            if (existingDevice == null)
+            {
+                // If not, add it to the database
+                _dbContext.ecoflowdevice.Add(device);
+                _dbContext.SaveChanges();
+            }
+            else
+            {
+                // If it exists, update the existing record
+                existingDevice.Online = device.Online;
+                _dbContext.SaveChanges();
+            }
+            // Optionally, you can return a Task.CompletedTask or any other relevant task
+            // to indicate that the operation is complete.
+            // For example:
+            // return Task.CompletedTask;
+            // Or if you want to return a completed task:
+            // return Task.FromResult(0);
+            return Task.CompletedTask;
+        }
+
+        // Fetch device data and write to database
+
         public Task FetchDeviceData(List<EcoflowDevice> ecoflowDevices, EcoflowClient ecoflowClient)
         {
             foreach (var device in ecoflowDevices)
