@@ -57,3 +57,4 @@ nunit-*.xml
 appsettings.json
 */temp/json/*
 .DS_Store
+/.vs
