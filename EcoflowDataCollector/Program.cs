@@ -14,8 +14,8 @@ namespace EcoflowDataCollector{
         
         public static void LoadConfiguration(IConfiguration configuration)
         {
-            ACCESS_KEY = configuration["AccessKey"] ?? string.Empty;
-            SECRET_KEY = configuration["SecretKey"] ?? string.Empty;
+            ACCESS_KEY = configuration["Ecoflow:AccessKey"] ?? string.Empty;
+            SECRET_KEY = configuration["Ecoflow:SecretKey"] ?? string.Empty;
         }
 
         static async Task Main(string[] args)
